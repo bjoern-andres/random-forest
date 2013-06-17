@@ -1,7 +1,7 @@
 random-forest
 =============
 
-andres::ml::DecisionTrees: A Fast C++ Implementation of Random Forests
+A Fast C++ Implementation of Random Forests
 
 Copyright (c) 2013 by Steffen Kirchhoff and Bjoern Andres.
 
