@@ -1,9 +1,14 @@
-/// Randomized Decision Trees: A Fast C++ Implementation of Random Forests.
+/// \mainpage
+/// andres::ml::DecisionTrees: A Fast C++ Implementation of Random Forests
 ///
-/// Reference:
+/// \section section_abstract Short Description
+/// The header file implements random forests as described in the article:
+///
 /// Leo Breiman. Random Forests. Machine Learning 45(1):5-32, 2001.
 /// http://dx.doi.org/10.1023%2FA%3A1010933404324
 /// 
+/// \section section_license License
+///
 /// Copyright (c) 2013 by Steffen Kirchhoff and Bjoern Andres.
 ///
 /// This software was developed by Steffen Kirchhoff and Bjoern Andres.
@@ -54,9 +59,13 @@
 
 #include "andres/marray.hxx"
 
+/// The public API.
 namespace andres {
+    
+/// Machine Learning.
 namespace ml {
 
+/// A node in a decision tree.
 template<class FEATURE, class LABEL>
 class DecisionNode {
 public:
@@ -117,6 +126,7 @@ private:
     bool isLeaf_;
 };
 
+/// A decision tree.
 template<class FEATURE = double, class LABEL = unsigned char>
 class DecisionTree {
 public:
@@ -157,6 +167,7 @@ private:
     std::vector<DecisionNodeType> decisionNodes_;
 };
 
+/// A bag of decision trees.
 template<
     class FEATURE = double, 
     class LABEL = unsigned char, 
@@ -219,7 +230,7 @@ DecisionNode<FEATURE, LABEL>::isLeaf() {
     return isLeaf_;
 }
 
-/// Returns, for a non-leaf, the index of a feature w.r.t. which a decision is made.
+/// Returns, for a non-leaf node, the index of a feature wrt which a decision is made.
 /// 
 template<class FEATURE, class LABEL>
 inline size_t 
@@ -228,7 +239,7 @@ DecisionNode<FEATURE, LABEL>::featureIndex() const {
     return featureIndex_;
 }
 
-/// Returns, for a non-leaf, the index of a feature w.r.t. which a decision is made.
+/// Returns, for a non-leaf node, the index of a feature wrt which a decision is made.
 /// 
 template<class FEATURE, class LABEL>
 inline size_t& 
@@ -237,7 +248,7 @@ DecisionNode<FEATURE, LABEL>::featureIndex() {
     return featureIndex_;
 }
 
-/// Returns, for a non-leaf, a threshold by which a decision is made.
+/// Returns, for a non-leaf node, a threshold by which a decision is made.
 /// 
 template<class FEATURE, class LABEL>
 inline typename DecisionNode<FEATURE, LABEL>::Feature 
@@ -246,7 +257,7 @@ DecisionNode<FEATURE, LABEL>::threshold() const {
     return threshold_;
 }
 
-/// Returns, for a non-leaf, a threshold by which a decision is made.
+/// Returns, for a non-leaf node, a threshold by which a decision is made.
 /// 
 template<class FEATURE, class LABEL>
 inline typename DecisionNode<FEATURE, LABEL>::Feature& 
@@ -255,7 +266,7 @@ DecisionNode<FEATURE, LABEL>::threshold() {
     return threshold_;
 }
 
-/// Returns, for a non-leaf, the index of one of its two child nodes.
+/// Returns, for a non-leaf node, the index of one of its two child nodes.
 ///
 /// \param j number of the child node (either 0 or 1).
 /// 
@@ -269,7 +280,7 @@ DecisionNode<FEATURE, LABEL>::childNodeIndex(
     return childNodeIndices_[j];
 }
 
-/// Returns, for a non-leaf, the index of one of its two child nodes.
+/// Returns, for a non-leaf node, the index of one of its two child nodes.
 ///
 /// \param j number of the child node (either 0 or 1).
 /// 
@@ -303,12 +314,12 @@ DecisionNode<FEATURE, LABEL>::label() {
 
 /// Learns a decision node from labeled samples as described by Breiman (2001).
 ///
-/// \param features. A matrix in which every rows corresponds to a sample and every column corresponds to a feature.
-/// \param labels. A vector of labels, one for each sample.
-/// \param sampleIndices. A sequence of indices of samples to be considered for learning. This vector is used by the function as a scratch-pad for sorting.
-/// \param sampleIndexBegin. Index of the first element of sampleIndices to be considered.
-/// \param sampleIndexEnd. Index one greater than that of the last element of sampleIndices to be considered.
-/// \param randomEngine. C++11 STL-compliant random number generator.
+/// \param features A matrix in which every rows corresponds to a sample and every column corresponds to a feature.
+/// \param labels A vector of labels, one for each sample.
+/// \param sampleIndices A sequence of indices of samples to be considered for learning. This vector is used by the function as a scratch-pad for sorting.
+/// \param sampleIndexBegin Index of the first element of sampleIndices to be considered.
+/// \param sampleIndexEnd Index one greater than that of the last element of sampleIndices to be considered.
+/// \param randomEngine C++11 STL-compliant random number generator.
 ///
 template<class FEATURE, class LABEL>
 template<class RandomEngine>
@@ -382,7 +393,7 @@ DecisionNode<FEATURE, LABEL>::learn(
     for(size_t j = 0; j < numberOfFeaturesToBeAssessed; ++j) {
         const size_t fi = featureIndices[j];
 
-        // sort sample indices w.r.t. fi-th feature
+        // sort sample indices wrt fi-th feature
         std::sort(
             sampleIndices.begin() + sampleIndexBegin, 
             sampleIndices.begin() + sampleIndexEnd, 
@@ -417,7 +428,7 @@ DecisionNode<FEATURE, LABEL>::learn(
             ++numbersOfLabels[1][label];
         }
 
-        // assess all relevant splits w.r.t. fi-th feature
+        // assess all relevant splits wrt fi-th feature
         size_t thresholdIndex = sampleIndexBegin;
         for(;;) { 
             const size_t thresholdIndexOld = thresholdIndex;
@@ -493,7 +504,7 @@ DecisionNode<FEATURE, LABEL>::learn(
     threshold_ = optimalThreshold;
     featureIndex_ = optimalFeatureIndex;
 
-    // sort data w.r.t. optimal feature
+    // sort data wrt optimal feature
     std::sort(
         sampleIndices.begin() + sampleIndexBegin, 
         sampleIndices.begin() + sampleIndexEnd, 
@@ -549,9 +560,9 @@ DecisionTree<FEATURE, LABEL>::DecisionTree()
 
 /// Learns a decision tree as described by Leo Breiman (2001).
 ///
-/// \param features. A matrix in which every rows corresponds to a sample and every column corresponds to a feature.
-/// \param labels. A vector of labels, one for each sample.
-/// \param sampleIndices. A sequence of indices of samples to be considered for learning. This vector is used by the function as a scratch-pad for sorting.
+/// \param features A matrix in which every rows corresponds to a sample and every column corresponds to a feature.
+/// \param labels A vector of labels, one for each sample.
+/// \param sampleIndices A sequence of indices of samples to be considered for learning. This vector is used by the function as a scratch-pad for sorting.
 ///
 template<class FEATURE, class LABEL>
 inline void 
@@ -566,10 +577,10 @@ DecisionTree<FEATURE, LABEL>::learn(
 
 /// Learns a decision tree as described by Leo Breiman (2001).
 ///
-/// \param features. A matrix in which every rows corresponds to a sample and every column corresponds to a feature.
-/// \param labels. A vector of labels, one for each sample.
-/// \param sampleIndices. A sequence of indices of samples to be considered for learning. This vector is used by the function as a scratch-pad for sorting.
-/// \param randomEngine. C++11 STL-compliant random number generator.
+/// \param features A matrix in which every rows corresponds to a sample and every column corresponds to a feature.
+/// \param labels A vector of labels, one for each sample.
+/// \param sampleIndices A sequence of indices of samples to be considered for learning. This vector is used by the function as a scratch-pad for sorting.
+/// \param randomEngine C++11 STL-compliant random number generator.
 ///
 template<class FEATURE, class LABEL>
 template<class RandomEngine>
@@ -699,8 +710,8 @@ DecisionTree<FEATURE, LABEL>::decisionNode(
 
 /// Predicts the labels of feature vectors.
 ///
-/// \param features. A matrix in which every rows corresponds to a sample and every column corresponds to a feature.
-/// \param labels. A vector of labels, one for each sample. (output)
+/// \param features A matrix in which every rows corresponds to a sample and every column corresponds to a feature.
+/// \param labels A vector of labels, one for each sample. (output)
 ///
 template<class FEATURE, class LABEL>
 inline void 
@@ -763,9 +774,9 @@ DecisionForest<FEATURE, LABEL, PROBABILITY>::size() const {
 
 /// Learns a decision forest from labeled samples as described by Breiman (2001).
 ///
-/// \param features. A matrix in which every rows corresponds to a sample and every column corresponds to a feature.
-/// \param labels. A vector of labels, one for each sample.
-/// \param numberOfDecisionTrees. Number of decision trees to be learned.
+/// \param features A matrix in which every rows corresponds to a sample and every column corresponds to a feature.
+/// \param labels A vector of labels, one for each sample.
+/// \param numberOfDecisionTrees Number of decision trees to be learned.
 ///
 template<class FEATURE, class LABEL, class PROBABILITY>
 inline void 
@@ -780,10 +791,10 @@ DecisionForest<FEATURE, LABEL, PROBABILITY>::learn(
 
 /// Learns a decision forest from labeled samples as described by Breiman (2001).
 ///
-/// \param features. A matrix in which every rows corresponds to a sample and every column corresponds to a feature.
-/// \param labels. A vector of labels, one for each sample.
-/// \param numberOfDecisionTrees. Number of decision trees to be learned.
-/// \param randomEngine. C++11 STL-compatible random number generator.
+/// \param features A matrix in which every rows corresponds to a sample and every column corresponds to a feature.
+/// \param labels A vector of labels, one for each sample.
+/// \param numberOfDecisionTrees Number of decision trees to be learned.
+/// \param randomEngine C++11 STL-compatible random number generator.
 ///
 template<class FEATURE, class LABEL, class PROBABILITY>
 template<class RandomEngine>
@@ -818,8 +829,8 @@ DecisionForest<FEATURE, LABEL, PROBABILITY>::learn(
 
 /// Predict the label probabilities of samples as described by Breiman (2001).
 ///
-/// \param features. A matrix in which every rows corresponds to a sample and every column corresponds to a feature.
-/// \param labelProbabilities. A matrix of probabilities in which every rows corresponds to a sample and every column corresponds to a label.
+/// \param features A matrix in which every rows corresponds to a sample and every column corresponds to a feature.
+/// \param labelProbabilities A matrix of probabilities in which every rows corresponds to a sample and every column corresponds to a label.
 ///
 template<class FEATURE, class LABEL, class PROBABILITY>
 inline void 
@@ -862,7 +873,7 @@ DecisionForest<FEATURE, LABEL, PROBABILITY>::predict(
 
 /// Returns a decision tree.
 ///
-/// \param treeIndex. Index of the decision tree.
+/// \param treeIndex Index of the decision tree.
 ///
 template<class FEATURE, class LABEL, class PROBABILITY>
 inline const typename DecisionForest<FEATURE, LABEL, PROBABILITY>::DecisionTreeType& 

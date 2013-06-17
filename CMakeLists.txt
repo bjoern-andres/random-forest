@@ -1,6 +1,17 @@
-project(andres-ml-random-forest)
+cmake_minimum_required(VERSION 2.6)
+project(ml)
 include_directories(include)
-file(GLOB headers_insegt include/andres/* include/andres/ml/*)
+file(GLOB headers include/andres/* include/andres/ml/*)
+
+##############################################################################
+# Doxygen
+##############################################################################
+find_package(Doxygen QUIET)
+if(DOXYGEN_FOUND)
+    message(STATUS "Doxygen found")
+else()
+    message("doxygen not found")
+endif()
 
 ##############################################################################
 # MSVC-specific settings
@@ -26,3 +37,8 @@ endif()
 ##############################################################################
 add_executable(test-decision-trees src/unittest/ml/test-decision-trees.cxx ${headers})
 add_test(test-decision-trees test-decision-trees)
+
+if(DOXYGEN_FOUND)
+    configure_file("${ml_SOURCE_DIR}/doxygen/doxyfile-ml-decision-trees.in" "${ml_BINARY_DIR}/doxyfile-ml-decision-trees" @ONLY IMMEDIATE)
+    add_custom_target(doc-ml-decision-trees ALL COMMAND ${DOXYGEN} "${ml_BINARY_DIR}/doxyfile-ml-decision-trees")
+endif()
