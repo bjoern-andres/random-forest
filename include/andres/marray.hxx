@@ -79,6 +79,7 @@
 #define MARRAY_HXX
 
 #include <cassert>
+#include <cstddef>
 #include <stdexcept> // runtime_error
 #include <limits>
 #include <string>

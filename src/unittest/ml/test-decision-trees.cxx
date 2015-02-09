@@ -16,7 +16,7 @@ int main() {
     // define random feature matrix
     std::default_random_engine RandomNumberGenerator;
     typedef double Feature;
-    std::uniform_int_distribution<double> randomDistribution(0.0, 1.0);
+    std::uniform_real_distribution<double> randomDistribution(0.0, 1.0);
     const size_t shape[] = {numberOfSamples, numberOfFeatures};
     andres::Marray<Feature> features(shape, shape + 2);
     for(size_t sample = 0; sample < numberOfSamples; ++sample)

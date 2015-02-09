@@ -786,7 +786,8 @@ DecisionForest<FEATURE, LABEL, PROBABILITY>::learn(
     const size_t numberOfDecisionTrees
 ) {
     typedef std::default_random_engine RandomEngine;
-    learn<RandomEngine>(features, labels, numberOfDecisionTrees, RandomEngine());
+    RandomEngine randomEngine;
+    learn<RandomEngine>(features, labels, numberOfDecisionTrees, randomEngine);
 }
 
 /// Learns a decision forest from labeled samples as described by Breiman (2001).
