@@ -86,6 +86,9 @@ public:
     template<class RandomEngine>
         size_t learn(const andres::View<Feature>&, const andres::View<Label>&, 
             std::vector<size_t>&, const size_t, const size_t, RandomEngine&);
+    
+    void serialize(std::ostream& ) const;
+    void deserialize(std::istream& );
 
 private:
     struct ComparisonByFeature {
@@ -144,6 +147,9 @@ public:
         void learn(const andres::View<Feature>&, const andres::View<Label>&, 
             std::vector<size_t>&, RandomEngine&);
 
+    void serialize(std::ostream& ) const;
+    void deserialize(std::istream& );
+
 private:    
     struct TreeConstructionQueueEntry {
         TreeConstructionQueueEntry(
@@ -190,6 +196,9 @@ public:
     template<class RandomEngine>
         void learn(const andres::View<Feature>&, const andres::View<Label>&,
             const size_t, RandomEngine&);
+
+    void serialize(std::ostream& ) const;
+    void deserialize(std::istream& );
 
 private:
     template<class RandomEngine>
@@ -548,6 +557,30 @@ DecisionNode<FEATURE, LABEL>::sampleSubsetWithoutReplacement(
     }
 }
 
+template<class FEATURE, class LABEL>
+inline
+void DecisionNode<FEATURE, LABEL>::serialize(std::ostream& s) const
+{
+    s << " " << featureIndex_;
+    s << " " << threshold_;
+    s << " " << childNodeIndices_[0];
+    s << " " << childNodeIndices_[1];
+    s << " " << label_;
+    s << " " << isLeaf_;
+}
+
+template<class FEATURE, class LABEL>
+inline
+void DecisionNode<FEATURE, LABEL>::deserialize(std::istream& s)
+{
+    s >> featureIndex_;
+    s >> threshold_;
+    s >> childNodeIndices_[0];
+    s >> childNodeIndices_[1];
+    s >> label_;
+    s >> isLeaf_;
+}
+
 // implementation of DecisionTree
 
 /// Constructs a decision tree.
@@ -746,6 +779,28 @@ DecisionTree<FEATURE, LABEL>::predict(
     }
 }
 
+template<class FEATURE, class LABEL>
+inline
+void DecisionTree<FEATURE, LABEL>::serialize(std::ostream& s) const
+{
+    s << " " << decisionNodes_.size();
+
+    for (auto& node : decisionNodes_)
+        node.serialize(s);
+}
+
+template<class FEATURE, class LABEL>
+inline
+void DecisionTree<FEATURE, LABEL>::deserialize(std::istream& s)
+{
+    size_t N;
+    s >> N;
+    decisionNodes_.resize(N);
+
+    for (auto& node : decisionNodes_)
+        node.deserialize(s);
+}
+
 // implementation of DecisionForest
 
 /// Constructs a decision forest.
@@ -900,6 +955,28 @@ DecisionForest<FEATURE, LABEL, PROBABILITY>::sampleBootstrap(
         indices[j] = distribution(randomEngine);
         assert(indices[j] < size);
     }
+}
+
+template<class FEATURE, class LABEL, class PROBABILITY>
+inline
+void DecisionForest<FEATURE, LABEL, PROBABILITY>::serialize(std::ostream& s) const
+{
+    s << decisionTrees_.size();
+
+    for (auto& tree : decisionTrees_)
+        tree.serialize(s);
+}
+
+template<class FEATURE, class LABEL, class PROBABILITY>
+inline
+void DecisionForest<FEATURE, LABEL, PROBABILITY>::deserialize(std::istream& s)
+{
+    size_t N;
+    s >> N;
+    decisionTrees_.resize(N);
+
+    for (auto& tree : decisionTrees_)
+        tree.deserialize(s);
 }
 
 } // namespace ml
