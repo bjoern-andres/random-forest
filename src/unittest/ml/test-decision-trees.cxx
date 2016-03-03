@@ -62,8 +62,8 @@ int main() {
         if (fabs(probabilities(i) - probabilities_2(i)) < std::numeric_limits<double>::epsilon())
             ++cnt;
 
-    if (cnt == numberOfSamples)
-        std::cout << "two predictions coincide\n";
+    if (cnt != numberOfSamples)
+        throw std::runtime_error("two predictions coincide");
 
     return 0;
 }
