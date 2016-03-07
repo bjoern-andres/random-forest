@@ -10,7 +10,7 @@ inline void test(const bool& x) {
 }
 
 int main() {
-    const size_t numberOfSamples = 100;
+    const size_t numberOfSamples = 10000;
     const size_t numberOfFeatures = 2;
     
     // define random feature matrix
@@ -47,6 +47,23 @@ int main() {
     andres::Marray<Probability> probabilities(shape, shape + 2);
     decisionForest.predict(features, probabilities);
     // TODO: test formally
+
+    std::stringstream sstream;
+    decisionForest.serialize(sstream);
+
+    andres::ml::DecisionForest<Feature, Label, Probability> decisionForest_2;
+    decisionForest_2.deserialize(sstream);
+
+    andres::Marray<Probability> probabilities_2(shape, shape + 2);
+    decisionForest.predict(features, probabilities_2);
+
+    size_t cnt = 0;
+    for (size_t i = 0; i < numberOfSamples; ++i)
+        if (fabs(probabilities(i) - probabilities_2(i)) < std::numeric_limits<double>::epsilon())
+            ++cnt;
+
+    if (cnt != numberOfSamples)
+        throw std::runtime_error("two predictions coincide");
 
     return 0;
 }
