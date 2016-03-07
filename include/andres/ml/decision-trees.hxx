@@ -53,9 +53,10 @@
 #include <random>
 #include <vector>
 #include <queue>
-#include <cmath> // std::ceil, std::sqrt
-#include <algorithm> // std::sort
-#include <iterator> // std::distance
+#include <cmath>
+#include <algorithm>
+#include <iterator>
+#include <iostream>
 
 #include "andres/marray.hxx"
 
@@ -73,22 +74,22 @@ public:
     typedef LABEL Label;
 
     DecisionNode();
-    bool isLeaf() const;
     bool& isLeaf();
-    size_t featureIndex() const;
     size_t& featureIndex();
-    Feature threshold() const;
     Feature& threshold();
-    size_t childNodeIndex(const size_t) const;
     size_t& childNodeIndex(const size_t);
-    Label label() const;
     Label& label();
+    void deserialize(std::istream&);
+
+    bool isLeaf() const;
+    size_t featureIndex() const;
+    Feature threshold() const;
+    size_t childNodeIndex(const size_t) const;
+    Label label() const;
     template<class RandomEngine>
         size_t learn(const andres::View<Feature>&, const andres::View<Label>&, 
-            std::vector<size_t>&, const size_t, const size_t, RandomEngine&);
-    
-    void serialize(std::ostream& ) const;
-    void deserialize(std::istream& );
+            std::vector<size_t>&, const size_t, const size_t, RandomEngine&);   
+    void serialize(std::ostream&) const;
 
 private:
     struct ComparisonByFeature {
@@ -138,17 +139,17 @@ public:
     typedef DecisionNode<Feature, Label> DecisionNodeType;
 
     DecisionTree();
+    void learn(const andres::View<Feature>&, const andres::View<Label>&,
+        std::vector<size_t>&);
+    template<class RandomEngine>
+        void learn(const andres::View<Feature>&, const andres::View<Label>&,
+            std::vector<size_t>&, RandomEngine&);
+    void deserialize(std::istream&);
+
     size_t size() const; // number of decision nodes
     void predict(const andres::View<Feature>&, std::vector<Label>&) const;
     const DecisionNodeType& decisionNode(const size_t) const;
-    void learn(const andres::View<Feature>&, const andres::View<Label>&, 
-        std::vector<size_t>&);
-    template<class RandomEngine>
-        void learn(const andres::View<Feature>&, const andres::View<Label>&, 
-            std::vector<size_t>&, RandomEngine&);
-
-    void serialize(std::ostream& ) const;
-    void deserialize(std::istream& );
+    void serialize(std::ostream&) const;
 
 private:    
     struct TreeConstructionQueueEntry {
@@ -188,17 +189,17 @@ public:
 
     DecisionForest();
     void clear();    
-    size_t size() const;
-    const DecisionTreeType& decisionTree(const size_t) const;
-    void predict(const andres::View<Feature>&, andres::Marray<Probability>&) const;
     void learn(const andres::View<Feature>&, const andres::View<Label>&,
         const size_t = 255);
     template<class RandomEngine>
         void learn(const andres::View<Feature>&, const andres::View<Label>&,
             const size_t, RandomEngine&);
+    void deserialize(std::istream&);
 
-    void serialize(std::ostream& ) const;
-    void deserialize(std::istream& );
+    size_t size() const;
+    const DecisionTreeType& decisionTree(const size_t) const;
+    void predict(const andres::View<Feature>&, andres::Marray<Probability>&) const;
+    void serialize(std::ostream&) const;
 
 private:
     template<class RandomEngine>
@@ -557,9 +558,11 @@ DecisionNode<FEATURE, LABEL>::sampleSubsetWithoutReplacement(
     }
 }
 
+/// Serialization.
+///
 template<class FEATURE, class LABEL>
-inline
-void DecisionNode<FEATURE, LABEL>::serialize(std::ostream& s) const
+inline void
+DecisionNode<FEATURE, LABEL>::serialize(std::ostream& s) const
 {
     s << " " << featureIndex_;
     s << " " << threshold_;
@@ -569,9 +572,11 @@ void DecisionNode<FEATURE, LABEL>::serialize(std::ostream& s) const
     s << " " << isLeaf_;
 }
 
+/// De-serialization.
+///
 template<class FEATURE, class LABEL>
-inline
-void DecisionNode<FEATURE, LABEL>::deserialize(std::istream& s)
+inline void
+DecisionNode<FEATURE, LABEL>::deserialize(std::istream& s)
 {
     s >> featureIndex_;
     s >> threshold_;
@@ -779,26 +784,28 @@ DecisionTree<FEATURE, LABEL>::predict(
     }
 }
 
+/// Serialization.
+///
 template<class FEATURE, class LABEL>
-inline
-void DecisionTree<FEATURE, LABEL>::serialize(std::ostream& s) const
-{
+inline void
+DecisionTree<FEATURE, LABEL>::serialize(std::ostream& s) const {
     s << " " << decisionNodes_.size();
-
-    for (auto& node : decisionNodes_)
-        node.serialize(s);
+    for(size_t j = 0; j < decisionNodes_.size(); ++j) {
+        decisionNodes_[j].serialize(s);
+    }
 }
 
+/// De-serialization.
+///
 template<class FEATURE, class LABEL>
-inline
-void DecisionTree<FEATURE, LABEL>::deserialize(std::istream& s)
-{
-    size_t N;
-    s >> N;
-    decisionNodes_.resize(N);
-
-    for (auto& node : decisionNodes_)
-        node.deserialize(s);
+inline void
+DecisionTree<FEATURE, LABEL>::deserialize(std::istream& s) {
+    size_t numberOfDecisionNodes = 0;
+    s >> numberOfDecisionNodes;
+    decisionNodes_.resize(numberOfDecisionNodes);
+    for(size_t j = 0; j < numberOfDecisionNodes; ++j) {
+        decisionNodes_[j].deserialize(s);
+    }
 }
 
 // implementation of DecisionForest
@@ -957,26 +964,28 @@ DecisionForest<FEATURE, LABEL, PROBABILITY>::sampleBootstrap(
     }
 }
 
+/// Serialization.
+///
 template<class FEATURE, class LABEL, class PROBABILITY>
-inline
-void DecisionForest<FEATURE, LABEL, PROBABILITY>::serialize(std::ostream& s) const
-{
+inline void
+DecisionForest<FEATURE, LABEL, PROBABILITY>::serialize(std::ostream& s) const {
     s << decisionTrees_.size();
-
-    for (auto& tree : decisionTrees_)
-        tree.serialize(s);
+    for(size_t j = 0; j < decisionTrees_.size(); ++j) {
+        decisionTrees_[j].serialize(s);
+    }
 }
 
+/// De-serialization.
+///
 template<class FEATURE, class LABEL, class PROBABILITY>
-inline
-void DecisionForest<FEATURE, LABEL, PROBABILITY>::deserialize(std::istream& s)
-{
-    size_t N;
-    s >> N;
-    decisionTrees_.resize(N);
-
-    for (auto& tree : decisionTrees_)
-        tree.deserialize(s);
+inline void
+DecisionForest<FEATURE, LABEL, PROBABILITY>::deserialize(std::istream& s) {
+    size_t numberOfDecisionTrees;
+    s >> numberOfDecisionTrees;
+    decisionTrees_.resize(numberOfDecisionTrees);
+    for(size_t j = 0; j < numberOfDecisionTrees; ++j) {
+        decisionTrees_[j].deserialize(s);
+    }
 }
 
 } // namespace ml
