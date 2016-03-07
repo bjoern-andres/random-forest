@@ -10,7 +10,7 @@ inline void test(const bool& x) {
 }
 
 int main() {
-    const size_t numberOfSamples = 10000;
+    const size_t numberOfSamples = 100;
     const size_t numberOfFeatures = 2;
     
     // define random feature matrix

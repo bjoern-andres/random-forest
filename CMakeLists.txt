@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(ml)
 include_directories(include)
 file(GLOB headers include/andres/* include/andres/ml/*)
+enable_testing()
 
 ##############################################################################
 # Doxygen
