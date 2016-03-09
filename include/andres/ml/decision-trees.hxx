@@ -123,6 +123,48 @@ private:
             std::vector<size_t>& = std::vector<size_t>()
         );
 
+    template<typename T>
+    T read(std::istream& s, T)
+    {
+        T value;
+        s >> value;
+
+        return value;
+    }
+
+    unsigned char read(std::istream& s, unsigned char)
+    {
+        size_t value;
+        s >> value;
+
+        return value;
+    }
+
+    char read(std::istream& s, char)
+    {
+        ptrdiff_t value;
+        s >> value;
+
+        return value;
+    }
+
+    template<typename T>
+    void write(std::ostream& s, T value) const
+    {
+        s << value;
+    }
+
+    void write(std::ostream& s, unsigned char value) const
+    {
+        s << static_cast<size_t>(label_);
+    }
+
+    void write(std::ostream& s, char value) const
+    {
+        s << static_cast<ptrdiff_t>(label_);
+    }
+
+
     size_t featureIndex_;
     Feature threshold_;
     size_t childNodeIndices_[2]; // 0 means <, 1 means >=
@@ -565,10 +607,12 @@ inline void
 DecisionNode<FEATURE, LABEL>::serialize(std::ostream& s) const
 {
     s << " " << featureIndex_;
-    s << " " << threshold_;
+    s << " ";
+    write(s, threshold_);
     s << " " << childNodeIndices_[0];
     s << " " << childNodeIndices_[1];
-    s << " " << label_;
+    s << " ";
+    write(s, label_);
     s << " " << isLeaf_;
 }
 
@@ -579,10 +623,10 @@ inline void
 DecisionNode<FEATURE, LABEL>::deserialize(std::istream& s)
 {
     s >> featureIndex_;
-    s >> threshold_;
+    threshold_ = read(s, FEATURE());
     s >> childNodeIndices_[0];
     s >> childNodeIndices_[1];
-    s >> label_;
+    label_ = read(s, LABEL());
     s >> isLeaf_;
 }
 
